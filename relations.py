@@ -115,25 +115,32 @@ def full_join(parent_relation, child_relation, join_attributes):
     Returns:
     - updated_parent_relation (dict): The parent relation updated with relevant tuples from the child relation.
     """
+    # Initialize the result relation with all columns from the parent
     updated_parent_relation = {key: [] for key in parent_relation}
     for key in child_relation:
         if key not in updated_parent_relation:
-            updated_parent_relation[key] = []
+            updated_parent_relation[key] = []  # Add new columns from the child
 
+    # Iterate over parent rows and find matches in the child relation
     for i in range(len(next(iter(parent_relation.values())))):
         parent_row = {key: parent_relation[key][i] for key in parent_relation}
-        matches_found = False
+        
+        # Check for matches in the child relation
+        match_found = False
         for j in range(len(next(iter(child_relation.values())))):
             child_row = {key: child_relation[key][j] for key in child_relation}
             if all(parent_row[attr] == child_row[attr] for attr in join_attributes):
-                matches_found = True
+                match_found = True
+                # Combine the parent row with the matching child row
                 for key in updated_parent_relation:
                     updated_parent_relation[key].append(
-                        parent_row.get(key, child_row.get(key))
+                        child_row.get(key, parent_row.get(key))
                     )
-        if not matches_found:
-            for key in updated_parent_relation:
-                updated_parent_relation[key].append(parent_row.get(key, None))
+                break
+
+        # If no match is found, skip the parent row (no `None` values)
+        if not match_found:
+            continue
 
     return updated_parent_relation
 
