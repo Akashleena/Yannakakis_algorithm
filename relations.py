@@ -1,3 +1,5 @@
+import random
+
 # Define relations and join tree
 relations = {
     "R1": {"A": [1, 2, 3], "B": ["x", "y", "z"]},
@@ -48,10 +50,9 @@ def apply_selection(relation, condition):
     """
     filtered_relation = {key: [] for key in relation}
 
-    # Iterate over each row (tuple of values across all columns)
-    for i in range(len(next(iter(relation.values())))):  # Assumes all columns are the same length
-        row = {key: relation[key][i] for key in relation}  # Create a dictionary for this row
-        if condition(row):  # Check the condition
+    for i in range(len(next(iter(relation.values())))):
+        row = {key: relation[key][i] for key in relation}
+        if condition(row):
             for key in relation:
                 filtered_relation[key].append(row[key])
 
@@ -101,39 +102,85 @@ def downward_semi_join(join_tree, relations):
         relations[child] = semi_join(relations[parent], relations[child], join_attributes)
     return relations
 
-# Example selection condition: Filter R1 to keep only rows where A > 1
-def condition_R1(row):
+# Function to perform a full join
+def full_join(parent_relation, child_relation, join_attributes):
     """
-    Selection criterion for R1: Keep rows where A > 1.
+    Performs a full join between a parent and a child relation.
 
     Parameters:
-    - row (dict): A dictionary representing a row from the relation.
+    - parent_relation (dict): The parent relation.
+    - child_relation (dict): The child relation.
+    - join_attributes (list): The attributes to join on.
 
     Returns:
-    - bool: True if the row satisfies the condition, False otherwise.
+    - updated_parent_relation (dict): The parent relation updated with relevant tuples from the child relation.
     """
+    updated_parent_relation = {key: [] for key in parent_relation}
+    for key in child_relation:
+        if key not in updated_parent_relation:
+            updated_parent_relation[key] = []
+
+    for i in range(len(next(iter(parent_relation.values())))):
+        parent_row = {key: parent_relation[key][i] for key in parent_relation}
+        matches_found = False
+        for j in range(len(next(iter(child_relation.values())))):
+            child_row = {key: child_relation[key][j] for key in child_relation}
+            if all(parent_row[attr] == child_row[attr] for attr in join_attributes):
+                matches_found = True
+                for key in updated_parent_relation:
+                    updated_parent_relation[key].append(
+                        parent_row.get(key, child_row.get(key))
+                    )
+        if not matches_found:
+            for key in updated_parent_relation:
+                updated_parent_relation[key].append(parent_row.get(key, None))
+
+    return updated_parent_relation
+
+# Function to perform upward full join computation
+def upward_full_join(join_tree, relations):
+    """
+    Performs the upward full join computation for all parent-child pairs in the join tree.
+
+    Parameters:
+    - join_tree (list of tuples): The join tree, where each tuple is (parent, child).
+    - relations (dict): Dictionary of relations.
+
+    Returns:
+    - Updated relations dictionary with combined parent relations.
+    """
+    for parent, child in reversed(join_tree):
+        join_attributes = list(set(relations[parent].keys()) & set(relations[child].keys()))
+        relations[parent] = full_join(relations[parent], relations[child], join_attributes)
+    return relations
+
+# Example selection condition: Filter R1 to keep only rows where A > 1
+def condition_R1(row):
     return row["A"] > 1
 
+# Main function
 def main(relations):
-    # Print the original relations
     print("Original Relations:")
     for name, relation in relations.items():
         print_relation(name, relation)
 
-    # Apply selection to R1
     print("Applying selection to R1 (A > 1):")
     relations["R1"] = apply_selection(relations["R1"], condition_R1)
 
-    # Perform downward semi-join computation
     print("Performing downward semi-join computation:")
     relations = downward_semi_join(join_tree, relations)
 
-    # Print the updated relations
     print("Relations after downward semi-join:")
     for name, relation in relations.items():
         print_relation(name, relation)
 
-    # Print the join tree
+    print("Performing upward full join computation:")
+    relations = upward_full_join(join_tree, relations)
+
+    print("Final Relations after upward full join:")
+    for name, relation in relations.items():
+        print_relation(name, relation)
+
     print_join_tree(join_tree)
 
 if __name__ == "__main__":
