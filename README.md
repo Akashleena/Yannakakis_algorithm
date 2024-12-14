@@ -1,7 +1,6 @@
 # **CSE214 Project: Yannakakis Algorithm**
 
-This project implements and evaluates the Yannakakis algorithm for query optimization on relational databases. Below is an overview of all the files in this directory and their purposes.
-
+This project implements and evaluates the Yannakakis algorithm for query optimization on relational databases and test the order of joins.
 ## **Python Scripts**
 
 ### `relations.py`
