@@ -1,6 +1,15 @@
 # **CSE214 Project: Yannakakis Algorithm**
 
 This project implements and evaluates the Yannakakis algorithm for query optimization on relational databases and test the order of joins.
+Download dataset from [tp.fu-berlin.de](https://ftp.fu-berlin.de/pub/misc/movies/database/frozendata/)
+
+### `requirements.txt`
+- A list of Python dependencies required to run the project.
+- Install these dependencies using:
+  ```bash
+  pip3 install -r requirements.txt
+
+## Contents of yannakakis_project.zip
 ## **Python Scripts**
 
 ### `relations.py`
@@ -108,10 +117,7 @@ This project implements and evaluates the Yannakakis algorithm for query optimiz
 - A log-scale plot showing the scalability and performance of the Yannakakis algorithm.
 - Visualizes execution time comparisons for various dataset sizes.
 
-## **Other Files**
 
-### `requirements.txt`
-- A list of Python dependencies required to run the project.
 
 
 
